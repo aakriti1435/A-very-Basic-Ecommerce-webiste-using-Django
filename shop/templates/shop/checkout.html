@@ -1,0 +1,115 @@
+{% extends 'shop/basic.html' %} {% block title %} Check Out{% endblock %} {% block css %}
+<style>
+
+</style>
+{% endblock %} {% block body %}
+<div class="container">
+    <div class="col my-2">
+        <h2> Step 1 : Awesome Cart Express Checkout - Review Your items in the Cart </h2>
+        <div>
+            <ul class="list-group" id="items">
+            </ul>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb my-2">
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Your Total Bill amout is <b>$ <span id="totalPrice"></span></b>. You have to fill your details below to place your order. Thanks for ordering with us !
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="col my-4">
+        <h2> Step 2 : Enter your Address and other required details </h2>
+        <form method="POST" action="/shop/checkout/">
+            {% csrf_token %}
+            <input type="hidden" name="amount" id="amount">
+            <input type="hidden" name="itemsJson" id="itemsJson">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputname">Name</label>
+                    <input name="name" type="text" class="form-control" id="name" placeholder="Enter Your Full Name">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputEmail">Email</label>
+                    <input name="email" type="email" class="form-control" id="email" placeholder="Enter Your Email">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputphone">Phone No.</label>
+                <input type="tel" name="mobile" class="form-control" id="mobile" placeholder="Enter Your Phone Number Here">
+            </div>
+
+            <div class="form-group">
+                <label for="inputAddress">Address </label>
+                <input type="text" name="address1" class="form-control" id="address1" placeholder="1234 Main St">
+            </div>
+            <div class="form-group">
+                <label for="inputAddress2"> Address line 2 </label>
+                <input type="text" name="address2" class="form-control" id="address2" placeholder="Apartment, studio, or floor">
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputCity">City</label>
+                    <input type="text" name="city" class="form-control" id="city" placeholder="Enter Your City">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="inputState">State</label>
+                    <input type="text" name="state" class="form-control" id="state" placeholder="Enter State">
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="inputZip">Pin Code</label>
+                    <input type="text" name="zip_code" class="form-control" id="zip_code" placeholder="Pin Code">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary place">Place Order</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %} {% block js %}
+<script>
+    if (localStorage.getItem('cart') == null) {
+        var cart = {};
+    } else {
+        cart = JSON.parse(localStorage.getItem('cart'));
+    }
+    console.log(cart);
+    var sum = 0;
+    var totalPrice = 0;
+    if ($.isEmptyObject(cart)) {
+        //If our Cart is Empty
+        mystr = `<p>Your Cart Is Empty , Please Add Some Items To Your Cart Before Checking Out !</p>`
+        $('#items').append(mystr);
+    } else {
+        for (item in cart) {
+            let qty = cart[item][0];
+            let name = cart[item][1];
+            let itemPrice = cart[item][2];
+            sum = sum + qty;
+            totalPrice = totalPrice + (qty * itemPrice)
+            mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                 ${name}
+                 <span class="badge badge-primary badge-pill">${qty}</span>
+                 </li>`
+
+            $('#items').append(mystr);
+        }
+    }
+    document.getElementById('cart').innerHTML = sum;
+    document.getElementById('totalPrice').innerHTML = totalPrice;
+
+    $('#itemsJson').val(JSON.stringify(cart));
+    $('.place').on('click', function() {
+        localStorage.clear();
+        alert('Order Placed ! Your Order id is {{id}} . You can use it to track your order using our order tracker.');
+        document.location = "/shop";
+    });
+    //alert('Thanks For Ordering with us . Your Order id is {{id}} >You can use it to track your order using our order tracker.');
+
+    //if (thank == true) {
+    //alert('Thanks For Ordering with us . Your Order id is {{id}} >You can use it to track your order using our order tracker.');
+    //localStorage.clear();
+    //}
+    $('#amount').val($('#totalPrice').html())
+</script>
+{% endblock %}
